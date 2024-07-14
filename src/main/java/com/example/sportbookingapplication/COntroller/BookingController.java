@@ -1,24 +1,32 @@
 package com.example.sportbookingapplication.COntroller;
 
 import com.example.sportbookingapplication.Bookingservice.BookingService;
+import com.example.sportbookingapplication.DTos.BookingDetailsDTO;
 import com.example.sportbookingapplication.DTos.UserpreferedenueDetailsDTO;
 import com.example.sportbookingapplication.Models.*;
+import com.example.sportbookingapplication.PaymentService.PaymentService;
 import com.example.sportbookingapplication.Repository.BookngReposiryforsportsvenue;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.razorpay.RazorpayException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/book")
+@RequestMapping("/api/book")
 public class BookingController {
 
     @Autowired
     private BookingService bookingService;
 
+    @Autowired
+    private PaymentService paymentService;
+
+    @PreAuthorize("hasAuthority('SCOPE_READ')")
     @GetMapping("{id}/{cityid}")
     public List<sportVenue> get( @PathVariable("id") int id,@PathVariable("cityid") int cityid){
         SportName name = null;
@@ -40,15 +48,14 @@ public class BookingController {
 
         return bookingService.getsportlocationdetails(name,loc);
     }
-
-    @PostMapping
-    public BookingDetails BookCourt( @RequestBody  UserpreferedenueDetailsDTO detailsDTO) throws ParseException {
+    @PreAuthorize("hasAuthority('SCOPE_READ')")
+    @GetMapping
+    public BookingDetailsDTO BookCourt(@RequestBody  UserpreferedenueDetailsDTO detailsDTO) throws ParseException, JsonProcessingException, RazorpayException {
         return bookingService.Bookvenue(detailsDTO);
     }
-    @GetMapping({"payment/{amount}"})
-    public String GenerateLink(@PathVariable("amount") int amount) throws RazorpayException {
 
-      return  bookingService.generatepaymentlink(amount);
-    }
+
+
+   // git remote add origin https://github.com/nithish91827/Sportbooking.git
 
 }

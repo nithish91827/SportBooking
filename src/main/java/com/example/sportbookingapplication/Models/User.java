@@ -1,23 +1,34 @@
 package com.example.sportbookingapplication.Models;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
+@Table(name="USER_INFO")
 public class User extends BaseModel {
 
-    @NonNull
-    private String nameorEmailaddress;
+    @Column(name = "USER_NAME")
+    private String userName;
 
+    @Column(nullable = false, name = "EMAIL_ID", unique = true)
+    private String emailId;
 
-    @NotBlank(message = "Password is required")
-    @Size(min = 8, message = "Password must be at least 8 characters long")
+    @Column(nullable = false, name = "PASSWORD")
     private String password;
 
+    @Column(name = "MOBILE_NUMBER")
+    private String mobileNumber;
 
-    private Long Mobile_number;
+    @Column(nullable = false, name = "ROLES")
+    private String roles;
 }
+
+
+

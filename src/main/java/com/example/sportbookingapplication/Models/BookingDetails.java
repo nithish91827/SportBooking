@@ -39,4 +39,5 @@ private City city;
     int amount;
 
 
+
 }

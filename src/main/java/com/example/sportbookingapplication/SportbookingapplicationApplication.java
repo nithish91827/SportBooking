@@ -3,14 +3,17 @@ package com.example.sportbookingapplication;
 import com.example.sportbookingapplication.Models.*;
 import com.example.sportbookingapplication.Repository.SportRepository;
 import com.example.sportbookingapplication.Repository.SportsVenueRepository;
+import com.example.sportbookingapplication.security.RSAKeyRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 import java.util.Optional;
 
 @SpringBootApplication
+@EnableConfigurationProperties(RSAKeyRecord.class)
 public class SportbookingapplicationApplication implements CommandLineRunner {
 
     @Autowired

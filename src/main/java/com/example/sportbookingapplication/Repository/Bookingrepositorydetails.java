@@ -11,5 +11,6 @@ import java.util.UUID;
 
 @Repository
 public interface Bookingrepositorydetails extends JpaRepository<BookingDetails, UUID> {
-public List<BookingDetails> findAllByCityAndSportVenue(City city, sportVenue venue);
+public List<BookingDetails> findAllBySportVenueAndCity(sportVenue venue,City city);
+//List<BookingDetails> findAllByStatus_Pending();
 }

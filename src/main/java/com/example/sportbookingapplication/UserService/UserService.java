@@ -23,9 +23,11 @@ public class UserService {
     }
     public User AddUser(UserDTO userDTO){
       User user=new User();
-      user.setNameorEmailaddress(userDTO.getNameorEmailaddress());
+      user.setUserName(userDTO.getUserName());
       user.setPassword(bCryptPasswordEncoder.encode(userDTO.getPassword()));
-      user.setMobile_number(Long.valueOf(userDTO.getMobilenumber()));
+      user.setMobileNumber(userDTO.getMobileNumber());
+      user.setRoles(userDTO.getRoles());
+      user.setEmailId(userDTO.getEmailId());
         return userRepository.save(user);
     }
 
