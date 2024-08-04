@@ -2,6 +2,7 @@ package com.example.sportbookingapplication.DTos;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
+import lombok.NoArgsConstructor;
 
 public record UserRegistrationDto (
         @NotEmpty(message = "User Name must not be empty")

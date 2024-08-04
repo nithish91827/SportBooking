@@ -51,54 +51,55 @@ public class BookingService {
 return venues;
     }
 @Transactional
-    public BookingDetailsDTO Bookvenue(UserpreferedenueDetailsDTO detailsDTO) throws ParseException, RazorpayException, JsonProcessingException {
+    public BookingDetailsDTO Bookvenue(UserpreferedenueDetailsDTO detailsDTO) throws Exception {
+try {
+    BookingDetails details = new BookingDetails();
+    // UUID val=UUID.fromString(detailsDTO.getUuid());
+    Optional<User> user = userRepository.findByUserName(detailsDTO.getEmail());
+    details.setUser(user.get());
+    Optional<sportVenue> venue = sportsVenueRepository.findById(UUID.fromString(detailsDTO.getPreferedVenue()));
+    details.setSportVenue(venue.get());
+    details.setCity(venue.get().getLocation().getCity());
 
-        BookingDetails details=new BookingDetails();
-       // UUID val=UUID.fromString(detailsDTO.getUuid());
-       Optional<User> user=userRepository.findByUserName(detailsDTO.getEmail());
-       details.setUser(user.get());
-       Optional<sportVenue> venue=sportsVenueRepository.findById(UUID.fromString(detailsDTO.getPreferedVenue()));
-       details.setSportVenue(venue.get());
-       details.setCity(venue.get().getLocation().getCity());
+    DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+    //  format.setTimeZone(TimeZone.getTimeZone("Asia/Kolkata"));
+    LocalDateTime starttime = LocalDateTime.parse(detailsDTO.getStarttime(), format);
 
-        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-      //  format.setTimeZone(TimeZone.getTimeZone("Asia/Kolkata"));
-        LocalDateTime starttime =LocalDateTime.parse(detailsDTO.getStarttime(), format);
-
-        LocalDateTime endtime = LocalDateTime.parse(detailsDTO.getEndtime(), format);
-
-
-        // Convert Instant to LocalDate
+    LocalDateTime endtime = LocalDateTime.parse(detailsDTO.getEndtime(), format);
 
 
-        List<BookingDetails> SamevenueDetails=bookingrepositorydetails.findAllBySportVenueAndCity(venue.get(),venue.get().getLocation().getCity());
+    // Convert Instant to LocalDate
+
+
+    List<BookingDetails> SamevenueDetails = bookingrepositorydetails.findAllBySportVenueAndCity(venue.get(), venue.get().getLocation().getCity());
 //       Date Userprefferedstartdate=format.parse(detailsDTO.getStarttime());
 //       Date Userprefferedenddate=format.parse(detailsDTO.getEndtime());
 
-        for(BookingDetails booked:SamevenueDetails)
-        {
-           if(Checkifcolliding(starttime,endtime,booked))
-              return null;
-        }
-details.setStarttime(starttime);
-details.setEndTime(endtime);
+    for (BookingDetails booked : SamevenueDetails) {
+        if (Checkifcolliding(starttime, endtime, booked))
+            return null;
+    }
+    details.setStarttime(starttime);
+    details.setEndTime(endtime);
 
-details.setStatus(BookingStatus.Pending);
-        Duration duration = Duration.between(starttime, endtime);
+    details.setStatus(BookingStatus.Pending);
+    Duration duration = Duration.between(starttime, endtime);
 
-        // Extract the number of hours from the duration
-        long hours = Math.abs(duration.toHours());
-        Fare f=calculateamount.getprice(venue.get().getLocation().getCity());
-        int amount=f.Farecalulation(hours,starttime.getDayOfWeek().ordinal());
-        details.setAmount(amount);
-        BookingDetails pendingbookingdetails=bookingrepositorydetails.save(details);
-     String link = paymentService.generatepaymentlink(new UserDetailsDTO(user.get().getEmailId(), pendingbookingdetails.getID().toString(),amount));
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = objectMapper.readTree(link);
+    // Extract the number of hours from the duration
+    long hours = Math.abs(duration.toHours());
+    Fare f = calculateamount.getprice(venue.get().getLocation().getCity());
+    int amount = f.Farecalulation(hours, starttime.getDayOfWeek().ordinal());
+    details.setAmount(amount);
+    BookingDetails pendingbookingdetails = bookingrepositorydetails.save(details);
+    String link = paymentService.generatepaymentlink(new UserDetailsDTO(user.get().getEmailId(), pendingbookingdetails.getID().toString(), amount));
+    ObjectMapper objectMapper = new ObjectMapper();
+    JsonNode jsonNode = objectMapper.readTree(link);
+    String shortlink = jsonNode.get("short_url").asText();
+    return new BookingDetailsDTO(pendingbookingdetails, shortlink);
 
-        String shortlink=jsonNode.get("short_url").asText();
-            return new BookingDetailsDTO(pendingbookingdetails,shortlink);
-
+}catch (Exception e){
+        throw  new Exception(e);
+    }
     }
 
     boolean Checkifcolliding(LocalDateTime starttime,LocalDateTime endtime,BookingDetails booking){
@@ -114,6 +115,11 @@ details.setStatus(BookingStatus.Pending);
              return true;
 
         return  false;
+    }
+
+    public List<BookingDetails> getallbookings(String Id){
+
+        return bookingrepositorydetails.findByUser_ID(UUID.fromString(Id));
     }
 
 

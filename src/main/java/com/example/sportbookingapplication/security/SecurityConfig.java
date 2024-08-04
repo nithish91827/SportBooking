@@ -38,6 +38,7 @@ public class SecurityConfig  {
     private final UserInfoManagerConfig userInfoManagerConfig;
     private final RSAKeyRecord rsaKeyRecord;
     private final JwtTokenUtils jwtTokenUtils;
+  //  private final CustomOAuth2AuthenticationSuccessHandler customOAuth2AuthenticationSuccessHandler;
    // private final JwtDecoder jwtDecoder;
     @Order(1)
     @Bean
@@ -66,8 +67,10 @@ public class SecurityConfig  {
                                 .anyRequest().authenticated()
                          // Permit access to /api/payment without authentication
                         // Require authentication for all other requests
-                )
-                .oauth2ResourceServer(oauth2->oauth2.jwt(withDefaults()))
+               ) //.oauth2Login(oauth2 -> oauth2
+//                        .successHandler(customOAuth2AuthenticationSuccessHandler)
+//                )
+               .oauth2ResourceServer(oauth2->oauth2.jwt(withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(new JwtAccessTokenFilter(rsaKeyRecord, jwtTokenUtils), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> {
@@ -90,6 +93,22 @@ public class SecurityConfig  {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
     }
+
+    @Order(2)
+    @Bean
+    public SecurityFilterChain GooglebasedAuthentation(HttpSecurity httpSecurity) throws Exception{
+
+        return httpSecurity.securityMatcher(new AntPathRequestMatcher("/api/**")).csrf((AbstractHttpConfigurer::disable))
+                .authorizeHttpRequests(auth->auth.anyRequest().authenticated())
+.oauth2Login(oauth2 -> oauth2
+                .userInfoEndpoint(userInfo -> userInfo
+                        .oidcUserService(new CustomOidcUserService()) // Use your custom OIDC user service
+                )
+        ).build();
+    }
+
+
+
     @Bean
     JwtDecoder jwtDecoder(){
         return NimbusJwtDecoder.withPublicKey(rsaKeyRecord.rsaPublicKey()).build();

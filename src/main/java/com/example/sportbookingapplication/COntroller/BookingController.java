@@ -9,6 +9,8 @@ import com.example.sportbookingapplication.Repository.BookngReposiryforsportsven
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.razorpay.RazorpayException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpCookie;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -48,10 +50,15 @@ public class BookingController {
 
         return bookingService.getsportlocationdetails(name,loc);
     }
-    @PreAuthorize("hasAuthority('SCOPE_READ')")
+    @PreAuthorize("hasAuthority('SCOPE_READ') or hasRole('READ')")
     @GetMapping
-    public BookingDetailsDTO BookCourt(@RequestBody  UserpreferedenueDetailsDTO detailsDTO) throws ParseException, JsonProcessingException, RazorpayException {
+    public BookingDetailsDTO BookCourt(@RequestBody  UserpreferedenueDetailsDTO detailsDTO) throws Exception {
         return bookingService.Bookvenue(detailsDTO);
+    }
+    @GetMapping("/getbookings")
+    @PreAuthorize("hasAuthority('SCOPE_READ')")
+    public List<BookingDetails> getallbookings(@RequestBody String ID){
+        return  bookingService.getallbookings(ID);
     }
 
 
